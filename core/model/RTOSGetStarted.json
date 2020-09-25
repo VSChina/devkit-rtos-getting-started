@@ -122,7 +122,7 @@
       },
       {
         "@type": "Component",
-        "schema": "dtmi:com:mxchip:mxchip_iot_devkit:DeviceManagement:DeviceInformation;1",
+        "schema": "dtmi:azure:DeviceManagement:DeviceInformation;1",
         "name": "deviceInformation",
         "displayName": "Device Information",
         "description": "Interface with basic device hardware information."
