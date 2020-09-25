@@ -5,87 +5,85 @@
     "description": "Reports current temperature , humidity and pressure from MXCHIP IoT Devkit.",
     "contents": [
       {
-        "@type": "Telemetry",
+        "@type": 
+        [
+            "Telemetry", 
+            "Temperature"
+        ],
         "name": "temperature",
         "displayName" : "Temperature",
-        "unit": "°C",
+        "unit": "degreeCelsius",
         "schema": "double"
       },
       {
-        "@type": "Telemetry",
+        "@type": "Telemetry", 
         "name": "humidity",
-        "displayName" : "Humidity",
-        "unit": "%",
+        "displayName" : "Humidity / %",
         "schema": "double"
       },
       {
-        "@type": "Telemetry",
+        "@type": 
+        [
+            "Telemetry", 
+            "Pressure"
+        ],
         "name": "pressure",
         "displayName" : "Pressure",
-        "unit": "hPa",
+        "unit": "kilopascal",
         "schema": "double"
       },
       {
         "@type": "Telemetry",
         "name": "magnetometerX",
-        "displayName" : "Magnetometer X",
-        "unit": "mgauss",
+        "displayName" : "Magnetometer X / mgauss",
         "schema": "double"
       },
       {
         "@type": "Telemetry",
         "name": "magnetometerY",
-        "displayName" : "Magnetometer Y",
-        "unit": "mgauss",
+        "displayName" : "Magnetometer Y / mgauss",
         "schema": "double"
       },
       {
         "@type": "Telemetry",
         "name": "magnetometerZ",
-        "displayName" : "Magnetometer Z",
-        "unit": "mgauss",
+        "displayName" : "Magnetometer Z / mgauss",
         "schema": "double"
       },
       {
         "@type": "Telemetry",
         "name": "accelerometerX",
-        "displayName" : "Accelerometer X",
-        "unit": "mg",
+        "displayName" : "Accelerometer X / mg",
         "schema": "double"
       },
       {
         "@type": "Telemetry",
         "name": "accelerometerY",
-        "displayName" : "Accelerometer Y",
-        "unit": "mg",
+        "displayName" : "Accelerometer Y  / mg",
         "schema": "double"
       },
       {
         "@type": "Telemetry",
         "name": "accelerometerZ",
-        "displayName" : "Accelerometer Z",
-        "unit": "mg",
+        "displayName" : "Accelerometer Z  / mg",
         "schema": "double"
       },
       {
         "@type": "Telemetry",
         "name": "gyroscopeX",
-        "displayName" : "Gyroscope X",
-        "unit": "mdps",
+        "displayName" : "Gyroscope X / mdps",
         "schema": "double"
       },
       {
         "@type": "Telemetry",
         "name": "gyroscopeY",
-        "displayName" : "Gyroscope Y",
-        "unit": "mdps",
+        "displayName" : "Gyroscope Y / mdps",
         "schema": "double"
       },
       {
         "@type": "Telemetry",
         "name": "gyroscopeZ",
-        "displayName" : "Gyroscope Z",
-        "unit": "mdps",
+        "displayName" : "Gyroscope Z / mdps",
         "schema": "double"
       },
       {

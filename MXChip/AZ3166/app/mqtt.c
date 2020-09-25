@@ -157,7 +157,7 @@ static void azure_iot_mqtt_publish_device_telemetry(AZURE_IOT_MQTT* azure_iot_mq
     snprintf(combined_message, sizeof(combined_message), "{");
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", HUMIDITY, hts221_data.humidity_perc);
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", TEMPERATURE, lps22hb_data.temperature_degC);
-    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", PRESSURE, lps22hb_data.pressure_hPa);
+    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", PRESSURE, lps22hb_data.pressure_hPa * 10);
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", MAGNETOMETERX, lis2mdl_data.magnetic_mG[0]);
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", MAGNETOMETERY, lis2mdl_data.magnetic_mG[1]);
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f", MAGNETOMETERZ, lis2mdl_data.magnetic_mG[2]);
