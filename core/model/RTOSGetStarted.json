@@ -16,9 +16,14 @@
         "schema": "double"
       },
       {
-        "@type": "Telemetry", 
+        "@type": 
+        [
+            "Telemetry", 
+            "RelativeHumidity"
+        ],
         "name": "humidity",
-        "displayName" : "Humidity / %",
+        "displayName" : "Humidity",
+        "unit": "percent",
         "schema": "double"
       },
       {
@@ -51,40 +56,70 @@
         "schema": "double"
       },
       {
-        "@type": "Telemetry",
+        "@type": 
+        [
+            "Telemetry", 
+            "Acceleration"
+        ],
         "name": "accelerometerX",
-        "displayName" : "Accelerometer X / mg",
-        "schema": "double"
+        "displayName" : "Accelerometer X",
+        "schema": "double",
+        "unit": "gForce"
       },
       {
-        "@type": "Telemetry",
+        "@type": 
+        [
+            "Telemetry", 
+            "Acceleration"
+        ],
         "name": "accelerometerY",
-        "displayName" : "Accelerometer Y  / mg",
-        "schema": "double"
+        "displayName" : "Accelerometer Y",
+        "schema": "double",
+        "unit": "gForce"
       },
       {
-        "@type": "Telemetry",
+        "@type": 
+        [
+            "Telemetry", 
+            "Acceleration"
+        ],
         "name": "accelerometerZ",
-        "displayName" : "Accelerometer Z  / mg",
-        "schema": "double"
+        "displayName" : "Accelerometer Z",
+        "schema": "double",
+        "unit": "gForce"
       },
       {
-        "@type": "Telemetry",
+        "@type": 
+        [
+            "Telemetry", 
+            "AngularVelocity"
+        ],
         "name": "gyroscopeX",
-        "displayName" : "Gyroscope X / mdps",
-        "schema": "double"
+        "displayName" : "Gyroscope X",
+        "schema": "double",
+        "unit":"degreePerSecond"
       },
       {
-        "@type": "Telemetry",
+        "@type": 
+        [
+            "Telemetry", 
+            "AngularVelocity"
+        ],
         "name": "gyroscopeY",
-        "displayName" : "Gyroscope Y / mdps",
-        "schema": "double"
+        "displayName" : "Gyroscope Y",
+        "schema": "double",
+        "unit":"degreePerSecond"
       },
       {
-        "@type": "Telemetry",
+        "@type": 
+        [
+            "Telemetry", 
+            "AngularVelocity"
+        ],
         "name": "gyroscopeZ",
-        "displayName" : "Gyroscope Z / mdps",
-        "schema": "double"
+        "displayName" : "Gyroscope Z",
+        "schema": "double",
+        "unit":"degreePerSecond"
       },
       {
         "@type": "Property",

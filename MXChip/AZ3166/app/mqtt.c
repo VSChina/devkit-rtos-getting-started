@@ -157,7 +157,7 @@ static void azure_iot_mqtt_publish_device_telemetry(AZURE_IOT_MQTT* azure_iot_mq
     snprintf(combined_message, sizeof(combined_message), "{");
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", HUMIDITY, hts221_data.humidity_perc);
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", TEMPERATURE, lps22hb_data.temperature_degC);
-    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", PRESSURE, lps22hb_data.pressure_hPa * 10);
+    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", PRESSURE, lps22hb_data.pressure_hPa / 10);
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", MAGNETOMETERX, lis2mdl_data.magnetic_mG[0]);
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", MAGNETOMETERY, lis2mdl_data.magnetic_mG[1]);
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f", MAGNETOMETERZ, lis2mdl_data.magnetic_mG[2]);
@@ -172,9 +172,9 @@ static void azure_iot_mqtt_publish_device_telemetry_acceleration(AZURE_IOT_MQTT*
 
     // Send multiple telemetries in a single message
     snprintf(combined_message, sizeof(combined_message), "{");
-    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", ACCELEROMETERX, lsm6dsl_data.acceleration_mg[0]);
-    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", ACCELEROMETERY, lsm6dsl_data.acceleration_mg[1]);
-    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f", ACCELEROMETERZ, lsm6dsl_data.acceleration_mg[2]);
+    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", ACCELEROMETERX, lsm6dsl_data.acceleration_mg[0] / 1000);
+    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", ACCELEROMETERY, lsm6dsl_data.acceleration_mg[1] / 1000);
+    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f", ACCELEROMETERZ, lsm6dsl_data.acceleration_mg[2] / 1000);
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "}");
 
     azure_iot_mqtt_publish_telemetry(azure_iot_mqtt, combined_message);
@@ -186,9 +186,9 @@ static void azure_iot_mqtt_publish_device_telemetry_angular_rate(AZURE_IOT_MQTT*
 
     // Send multiple telemetries in a single message
     snprintf(combined_message, sizeof(combined_message), "{");
-    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", GYROSCOPEX, lsm6dsl_data.angular_rate_mdps[0]);
-    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", GYROSCOPEY, lsm6dsl_data.angular_rate_mdps[1]);
-    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f", GYROSCOPEZ, lsm6dsl_data.angular_rate_mdps[2]);
+    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", GYROSCOPEX, lsm6dsl_data.angular_rate_mdps[0] / 1000);
+    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f,", GYROSCOPEY, lsm6dsl_data.angular_rate_mdps[1] / 1000);
+    snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "\"%s\":%3.2f", GYROSCOPEZ, lsm6dsl_data.angular_rate_mdps[2] / 1000);
     snprintf(combined_message + strlen(combined_message), sizeof(combined_message), "}");
 
     azure_iot_mqtt_publish_telemetry(azure_iot_mqtt, combined_message);
