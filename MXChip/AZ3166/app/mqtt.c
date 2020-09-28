@@ -76,10 +76,9 @@ static void mqtt_device_method(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* method_name
         printf("Screen : %s\r\n", message);
 
         int len = strlen(message);
-        char* print_message = (char*)malloc(len - 2);
+        char print_message[20] = {""};
         strncpy(print_message, message + 1, len - 2);
         screen_print(print_message, L0);
-        free(print_message);
         // Return success
         azure_iot_mqtt_respond_direct_method(azure_iot_mqtt, 200);
     }
