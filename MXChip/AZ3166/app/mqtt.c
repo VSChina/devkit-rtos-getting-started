@@ -80,6 +80,7 @@ static void mqtt_device_method(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* method_name
         strncpy(print_message, message + 1, len - 2);
         print_message[len - 2] = '\0';
         screen_print(print_message, L0);
+        free(print_message);
         // Return success
         azure_iot_mqtt_respond_direct_method(azure_iot_mqtt, 200);
     }
