@@ -13,17 +13,17 @@ typedef enum
 } WiFi_Mode;
 
 // ----------------------------------------------------------------------------
-// WiFi connection information
+// WiFi connection config
 // ----------------------------------------------------------------------------
-#define WIFI_SSID     "nova_4e"
-#define WIFI_PASSWORD "yangkai123"
+#define WIFI_SSID     ""
+#define WIFI_PASSWORD ""
 #define WIFI_MODE     WPA2_PSK_AES
 
 // ----------------------------------------------------------------------------
 // Azure IoT Hub Connection Transport
-// Define this to use the nx client, otherwise MQTT
+// Define to use the legacy MQTT connection, else Azure RTOS SDK for Azure IoT
 // ----------------------------------------------------------------------------
-//#define USE_NX_CLIENT_PREVIEW
+#define ENABLE_LEGACY_MQTT
 
 // ----------------------------------------------------------------------------
 // Azure IoT Dynamic Provisioning Service
@@ -34,9 +34,9 @@ typedef enum
 // ----------------------------------------------------------------------------
 // Azure IoT Hub config
 // ----------------------------------------------------------------------------
-#define IOT_HUB_HOSTNAME "kaihub0706.azure-devices.net"
-#define IOT_DEVICE_ID    "kairtos"
-#define IOT_PRIMARY_KEY  "cnYPQA6OeI3vttp2/HRgQjzd+raUMIUiN7DfuRLhL3g="
+#define IOT_HUB_HOSTNAME ""
+#define IOT_DEVICE_ID    ""
+#define IOT_PRIMARY_KEY  ""
 
 // ----------------------------------------------------------------------------
 // Azure IoT DPS config

@@ -8,6 +8,11 @@ set(TARGET_TRIPLET "arm-none-eabi-")
 # do some windows specific logic
 if(WIN32)
     set(TOOLCHAIN_EXT ".exe")
+    
+    # use the repo version of ninja on Windows as there is no Ninja installer
+    set(CMAKE_MAKE_PROGRAM ${CMAKE_CURRENT_LIST_DIR}/ninja CACHE STRING "Ninja location")
+    
+    # locate if the arm gcc compiler is installed via visual studio
     execute_process(
         COMMAND ${CMAKE_CURRENT_LIST_DIR}/vswhere.exe -latest -requires Component.MDD.Linux.GCC.arm -find **/gcc_arm/bin
         OUTPUT_VARIABLE VSWHERE_PATH
@@ -63,18 +68,16 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-set(CMAKE_COMMON_FLAGS "-ffunction-sections -fdata-sections -Wunused -Wuninitialized -Wall")
-set(CMAKE_C_FLAGS 	"${MCPU_FLAGS} ${VFP_FLAGS} ${SPECS_FLAGS} ${CMAKE_COMMON_FLAGS}")
-set(CMAKE_CXX_FLAGS "${MCPU_FLAGS} ${VFP_FLAGS} ${SPECS_FLAGS} ${CMAKE_COMMON_FLAGS}")
-set(CMAKE_ASM_FLAGS "${MCPU_FLAGS} ${VFP_FLAGS} ${SPECS_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${LD_FLAGS} -Wl,--gc-sections,-print-memory-usage")
+set(CMAKE_COMMON_FLAGS "--specs=nano.specs -ffunction-sections -fdata-sections -fno-strict-aliasing -fno-builtin -fshort-enums -Wunused -Wuninitialized -Wall -Wshadow -Wdouble-promotion -Werror")
+set(CMAKE_C_FLAGS 	"${MCPU_FLAGS} ${VFP_FLAGS} ${CMAKE_COMMON_FLAGS}")
+set(CMAKE_CXX_FLAGS "${MCPU_FLAGS} ${VFP_FLAGS} ${CMAKE_COMMON_FLAGS}")
+set(CMAKE_ASM_FLAGS "${MCPU_FLAGS} ${VFP_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${LD_FLAGS} -fno-common -Wl,--gc-sections,-print-memory-usage")
 
-set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_CXX_ASM_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_C_ASM_FLAGS_DEBUG "-g")
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g3")
+set(CMAKE_CXX_ASM_FLAGS_DEBUG "-O0 -g3")
+set(CMAKE_C_ASM_FLAGS_DEBUG "-g3")
 
-set(CMAKE_C_FLAGS_RELEASE "-O3")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_C_FLAGS_RELEASE "-Os")
+set(CMAKE_CXX_FLAGS_RELEASE "-Os")
 set(CMAKE_ASM_FLAGS_RELEASE "")
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-flto")

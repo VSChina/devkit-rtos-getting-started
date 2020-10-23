@@ -1,6 +1,6 @@
 ---
 page_type: sample
-description: Connecting an MXChip AZ3166 device to Azure IoT using MQTT
+description: Connecting an MXChip AZ3166 device to Azure IoT using Azure RTOS
 languages:
 - c
 products:
@@ -55,13 +55,12 @@ The cloned repo contains a setup script that installs and configures the require
 > Note: The setup script installs the following tools:
 > * [GCC](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm): Compile
 > * [CMake](https://cmake.org): Build
-> * [Ninja](https://ninja-build.org): Build
 > * [Termite](https://www.compuphase.com/software_termite.htm): Monitor COM port output for connected devices
 > * [Azure IoT Explorer](https://github.com/Azure/azure-iot-explorer/releases): Cross-platform utility to  monitor and manage Azure IoT resources
 
 To run the setup script:
 
-1. Open a console app with administrator privileges, go to the following path in the repo, and run the setup script named *get-toolchain.bat*. If you use File Explorer, right-click the file and select **Run As Administrator**.
+1. From File Explorer, navigate to the following path in the repo and run the setup script named *get-toolchain.bat*:
 
     > *devkit-rtos-getting-started\tools\get-toolchain.bat*
 
@@ -161,16 +160,7 @@ To connect the MXChip DevKit to Azure, you'll modify a configuration file for Wi
     |-------------|-----|
     |`WIFI_SSID` |{*Your Wi-Fi ssid*}|
     |`WIFI_PASSWORD` |{*Your Wi-Fi password*}|
-    |`WIFI_SECURITY` |{*Your Wi-Fi security type*}|
-
-    For the value of the `WIFI_SECURITY` constant, you can use one of the most common Wi-Fi modes from the following list, or check the file */MXChip/AZ3166/lib/wiced_sdk/43xxx_Wi-Fi/wwd_constants.h* for a complete list of Wi-Fi mode values.
-
-    |Wi-Fi security mode|Value to assign to the `WIFI_SECURITY` constant|
-    |-------------|-----|
-    |None |`WICED_SECURITY_OPEN`|
-    |WEP |`WICED_SECURITY_WEP_PSK`|
-    |WPA2_PSK_AES |`WICED_SECURITY_WPA2_AES_PSK`|
-    |WPA2_PSK_TKIP |`WICED_SECURITY_WPA2_MIXED_PSK`|
+    |`WIFI_MODE` |{*Your Wi-Fi security type*}|
 
 1. Edit the same file to set the Azure IoT device information constants to the values that you saved after you created Azure resources.
 
@@ -339,12 +329,12 @@ To delete a resource group by name:
 
 - To learn how to define the interface by [DTDL v2](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md), open the `core/model/RTOSGetStarted.json`. 
     - It defines the telemetry, property and command supported by this sample.
-- To learn how the telemetry is sent to the Azure IoT, open the `MXChip\AZ3166\app\mqtt.c` file
+- To learn how the telemetry is sent to the Azure IoT, open the `MXChip\AZ3166\app\legacy\mqtt.c` file
     - The function **azure_iot_mqtt_entry** gets the sensor data and sends multiple telemetries.
-- To learn how property values are reported to the Azure IoT, open the `MXChip\AZ3166\app\mqtt.c` file
+- To learn how property values are reported to the Azure IoT, open the `MXChip\AZ3166\app\legacy\mqtt.c` file
     - The function **azure_iot_mqtt_entry** sends multiple read only properties.
     - The function **mqtt_device_twin_desired_prop** handles the writeable property and then registered as callback in function **azure_iot_mqtt_entry**.
-- To learn how the DevKit device responds to commands for LED actions and  OLED display text action called from the IoT Central application, open the `MXChip\AZ3166\app\mqtt.c` file
+- To learn how the DevKit device responds to commands for LED actions and  OLED display text action called from the IoT Central application, open the `MXChip\AZ3166\app\legacy\mqtt.c` file
     - The function **mqtt_device_method** processes the commands, and then registered as callback in function **azure_iot_mqtt_entry**.
 
 

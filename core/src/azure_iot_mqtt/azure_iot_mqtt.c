@@ -15,7 +15,7 @@
 #include "azure_iot_mqtt/azure_iot_dps_mqtt.h"
 #include "azure_iot_mqtt/sas_token.h"
 
-#define USERNAME                "%s/%s/?api-version=2020-05-31-preview&model-id=%s"
+#define USERNAME                "%s/%s/?api-version=2020-09-30&model-id=%s"
 #define PUBLISH_TELEMETRY_TOPIC "devices/%s/messages/events/"
 
 #define DEVICE_MESSAGE_BASE  "messages/devicebound/"
@@ -35,6 +35,23 @@
 #define MQTT_CLIENT_PRIORITY 2
 #define MQTT_TIMEOUT         (10 * TX_TIMER_TICKS_PER_SECOND)
 #define MQTT_KEEP_ALIVE      240
+
+CHAR* azure_iot_x509_hostname;
+
+static ULONG azure_iot_certificate_verify(NX_SECURE_TLS_SESSION* session, NX_SECURE_X509_CERT* certificate)
+{
+    UINT status;
+
+    // Check certicate matches the correct address
+    status = nx_secure_x509_common_name_dns_check(
+        certificate, (UCHAR*)azure_iot_x509_hostname, strlen(azure_iot_x509_hostname));
+    if (status)
+    {
+        printf("Error in certificate verification: DNS name did not match CN\r\n");
+    }
+
+    return status;
+}
 
 UINT azure_iot_mqtt_register_direct_method_callback(
     AZURE_IOT_MQTT* azure_iot_mqtt, func_ptr_direct_method mqtt_direct_method_callback)
@@ -107,26 +124,6 @@ UINT tls_setup(NXD_MQTT_CLIENT* client,
         return status;
     }
 
-    status = nx_secure_tls_remote_certificate_allocate(tls_session,
-        &azure_iot_mqtt->mqtt_remote_certificate,
-        azure_iot_mqtt->mqtt_remote_cert_buffer,
-        sizeof(azure_iot_mqtt->mqtt_remote_cert_buffer));
-    if (status != NX_SUCCESS)
-    {
-        printf("Failed to create remote certificate buffer (0x%04x)\r\n", status);
-        return status;
-    }
-
-    status = nx_secure_tls_remote_certificate_allocate(tls_session,
-        &azure_iot_mqtt->mqtt_remote_issuer,
-        azure_iot_mqtt->mqtt_remote_issuer_buffer,
-        sizeof(azure_iot_mqtt->mqtt_remote_issuer_buffer));
-    if (status != NX_SUCCESS)
-    {
-        printf("Failed to create remote issuer buffer (0x%04x)\r\n", status);
-        return status;
-    }
-
     // Add a CA Certificate to our trusted store for verifying incoming server certificates
     status = nx_secure_x509_certificate_initialize(trusted_cert,
         (UCHAR*)azure_iot_root_ca,
@@ -154,6 +151,15 @@ UINT tls_setup(NXD_MQTT_CLIENT* client,
     if (status != NX_SUCCESS)
     {
         printf("Could not set TLS session packet buffer (0x%02x)\r\n", status);
+        return status;
+    }
+
+    // Setup the callback invoked when TLS has a certificate it wants to verify so we can
+    // do additional checks not done automatically by TLS.
+    status = nx_secure_tls_session_certificate_callback_set(tls_session, azure_iot_certificate_verify);
+    if (status)
+    {
+        printf("Failed to set the session certificate callback: status: %d", status);
         return status;
     }
 
@@ -185,7 +191,10 @@ static UINT mqtt_publish_float(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* topic, CHAR
 {
     CHAR mqtt_message[100];
 
-    snprintf(mqtt_message, sizeof(mqtt_message), "{\"%s\":%3.2f}", label, value);
+    int decvalue = value;
+    int fracvalue = abs(100 * (value - (long)value));
+    
+    snprintf(mqtt_message, sizeof(mqtt_message), "{\"%s\":%d.%2d}", label, decvalue, fracvalue);
     printf("Sending message %s\r\n", mqtt_message);
 
     return mqtt_publish(azure_iot_mqtt, topic, mqtt_message);
@@ -243,43 +252,28 @@ static VOID process_direct_method(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* topic, C
     azure_iot_mqtt->cb_ptr_mqtt_invoke_direct_method(azure_iot_mqtt, direct_method_name, message);
 }
 
-static VOID process_c2d_message(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* topic)
+static VOID process_c2d_message(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* topic, CHAR* message)
 {
-    CHAR key[64]   = {0};
-    CHAR value[64] = {0};
-
-    CHAR* location;
-    CHAR* find;
+    CHAR* properties;
 
     // Get to parameters list
-    find = strstr(topic, ".to");
-    if (find == 0)
+    if ((properties = strstr(topic, ".to")) == 0)
     {
+        printf("Received C2D message has no parameter list\r\n");
         return;
     }
 
-    // Extract the first property
-    find = strstr(find, "&");
-    if (find == 0)
+    // Find the properties
+    if ((properties = strstr(properties, "&")) == 0)
     {
-        return;
+        // No properties, point at the null terminator
+        properties = topic + strlen(topic);
     }
-
-    location = find + 1;
-
-    find = strstr(find, "=");
-    if (find == 0)
+    else
     {
-        return;
+        // Skip over the '&'
+        properties++;
     }
-
-    strncpy(key, location, find - location);
-
-    location = find + 1;
-
-    strncpy(value, location, sizeof(value));
-
-    printf("Received property key=%s, value=%s\r\n", key, value);
 
     if (azure_iot_mqtt->cb_ptr_mqtt_c2d_message == NULL)
     {
@@ -287,7 +281,7 @@ static VOID process_c2d_message(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* topic)
         return;
     }
 
-    azure_iot_mqtt->cb_ptr_mqtt_c2d_message(azure_iot_mqtt, key, value);
+    azure_iot_mqtt->cb_ptr_mqtt_c2d_message(azure_iot_mqtt, properties, message);
 }
 
 static VOID process_device_twin_response(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* topic, CHAR* message)
@@ -381,7 +375,8 @@ static VOID mqtt_notify_cb(NXD_MQTT_CLIENT* client_ptr, UINT number_of_messages)
         }
         else if (strstr((CHAR*)azure_iot_mqtt->mqtt_receive_topic_buffer, DEVICE_MESSAGE_BASE))
         {
-            process_c2d_message(azure_iot_mqtt, azure_iot_mqtt->mqtt_receive_topic_buffer);
+            process_c2d_message(
+                azure_iot_mqtt, azure_iot_mqtt->mqtt_receive_topic_buffer, azure_iot_mqtt->mqtt_receive_message_buffer);
         }
         else if (strstr((CHAR*)azure_iot_mqtt->mqtt_receive_topic_buffer, DEVICE_TWIN_RES_BASE))
         {
@@ -481,8 +476,8 @@ UINT azure_iot_mqtt_publish_int_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* c
 {
     CHAR property_message[128];
     snprintf(property_message, sizeof(property_message), "{");
-    snprintf(property_message + strlen(property_message), sizeof(property_message), "\"%s\":%d", label, value);
-    snprintf(property_message + strlen(property_message), sizeof(property_message), "}");
+    snprintf(property_message + strlen(property_message), sizeof(property_message), "\"%s\":{\"value\":%d,\"ac\":200,\"av\":1}", label, value);
+    snprintf(property_message + strlen(property_message), sizeof(property_message), ",\"__t\":\"c\"}");
 
     CHAR mqtt_publish_topic[100];
     CHAR mqtt_publish_message[256];
@@ -507,8 +502,8 @@ UINT azure_iot_mqtt_publish_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* compo
 {
     CHAR property_message[128];
     snprintf(property_message, sizeof(property_message), "{");
-    snprintf(property_message + strlen(property_message), sizeof(property_message), "\"%s\":\"%s\"", label, value);
-    snprintf(property_message + strlen(property_message), sizeof(property_message), "}");
+    snprintf(property_message + strlen(property_message), sizeof(property_message), "\"%s\":{\"value\":\"%s\",\"ac\":200,\"av\":1}", label, value);
+    snprintf(property_message + strlen(property_message), sizeof(property_message), ",\"__t\":\"c\"}");
 
     CHAR mqtt_publish_topic[100];
     CHAR mqtt_publish_message[256];
@@ -525,6 +520,27 @@ UINT azure_iot_mqtt_publish_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* compo
         "{\"%s\":%s}",
         component,
         property_message);
+
+    return mqtt_publish(azure_iot_mqtt, mqtt_publish_topic, mqtt_publish_message);
+}
+
+UINT azure_iot_mqtt_publish_properties(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* component, CHAR* message)
+{
+    CHAR mqtt_publish_topic[100];
+    CHAR mqtt_publish_message[256];
+
+    printf("Reporting properties %s\r\n", message);
+
+    snprintf(mqtt_publish_topic,
+        sizeof(mqtt_publish_topic),
+        DEVICE_TWIN_PUBLISH_TOPIC,
+        azure_iot_mqtt->reported_property_version++);
+
+    snprintf(mqtt_publish_message,
+        sizeof(mqtt_publish_message),
+        "{\"%s\":%s,\"__t\":\"c\"}}",
+        component,
+        message);
 
     return mqtt_publish(azure_iot_mqtt, mqtt_publish_topic, mqtt_publish_message);
 }
@@ -798,6 +814,9 @@ UINT azure_iot_mqtt_connect(AZURE_IOT_MQTT* azure_iot_mqtt)
         nx_secure_tls_session_delete(&azure_iot_mqtt->nxd_mqtt_client.nxd_mqtt_tls_session);
         return status;
     }
+
+    // Stash the hostname in a global variable so we can verify the cert at connect
+    azure_iot_x509_hostname = azure_iot_mqtt->mqtt_hub_hostname;
 
     status = nxd_mqtt_client_secure_connect(&azure_iot_mqtt->nxd_mqtt_client,
         &server_ip,

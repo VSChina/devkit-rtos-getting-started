@@ -23,9 +23,8 @@
 #define AZURE_IOT_MQTT_DIRECT_COMMAND_RID_SIZE 6
 
 #define AZURE_IOT_MQTT_CLIENT_STACK_SIZE 4096
-#define AZURE_IOT_MQTT_CERT_BUFFER_SIZE 4096
 
-#define TLS_PACKET_BUFFER 4096
+#define TLS_PACKET_BUFFER (7 * 1024)
 
 #define MQTT_QOS_0 0 // QoS 0 - Deliver at most once
 #define MQTT_QOS_1 1 // QoS 1 - Deliver at least once
@@ -78,11 +77,6 @@ struct AZURE_IOT_MQTT_STRUCT
     ULONG tls_metadata_buffer[NX_AZURE_IOT_TLS_METADATA_BUFFER_SIZE / sizeof(ULONG)];
     UCHAR tls_packet_buffer[TLS_PACKET_BUFFER];
 
-    NX_SECURE_X509_CERT mqtt_remote_certificate;
-    NX_SECURE_X509_CERT mqtt_remote_issuer;
-    UCHAR mqtt_remote_cert_buffer[AZURE_IOT_MQTT_CERT_BUFFER_SIZE];
-    UCHAR mqtt_remote_issuer_buffer[AZURE_IOT_MQTT_CERT_BUFFER_SIZE];
-
     func_ptr_direct_method cb_ptr_mqtt_invoke_direct_method;
     func_ptr_c2d_message cb_ptr_mqtt_c2d_message;
     func_ptr_device_twin_desired_prop cb_ptr_mqtt_device_twin_desired_prop_callback;
@@ -111,6 +105,7 @@ UINT azure_iot_mqtt_publish_float_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR*
 UINT azure_iot_mqtt_publish_bool_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* label, bool value);
 UINT azure_iot_mqtt_publish_int_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* component, CHAR* label, int value);
 UINT azure_iot_mqtt_publish_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* component, CHAR* label, CHAR* value);
+UINT azure_iot_mqtt_publish_properties(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* component, CHAR* message);
 UINT azure_iot_mqtt_publish_float_telemetry(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* label, float value);
 UINT azure_iot_mqtt_publish_telemetry(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* message);
 UINT azure_iot_mqtt_publish_int_writeable_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* label, int value);
