@@ -191,9 +191,9 @@ static UINT mqtt_publish_float(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* topic, CHAR
 {
     CHAR mqtt_message[100];
 
-    int decvalue = value;
+    int decvalue  = value;
     int fracvalue = abs(100 * (value - (long)value));
-    
+
     snprintf(mqtt_message, sizeof(mqtt_message), "{\"%s\":%d.%2d}", label, decvalue, fracvalue);
     printf("Sending message %s\r\n", mqtt_message);
 
@@ -476,8 +476,8 @@ UINT azure_iot_mqtt_publish_int_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* c
 {
     CHAR property_message[128];
     snprintf(property_message, sizeof(property_message), "{");
-    snprintf(property_message + strlen(property_message), sizeof(property_message), "\"%s\":{\"value\":%d,\"ac\":200,\"av\":1}", label, value);
-    snprintf(property_message + strlen(property_message), sizeof(property_message), ",\"__t\":\"c\"}");
+    snprintf(property_message + strlen(property_message), sizeof(property_message), "\"%s\":%d,", label, value);
+    snprintf(property_message + strlen(property_message), sizeof(property_message), "\"__t\":\"c\"}");
 
     CHAR mqtt_publish_topic[100];
     CHAR mqtt_publish_message[256];
@@ -489,11 +489,7 @@ UINT azure_iot_mqtt_publish_int_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* c
         DEVICE_TWIN_PUBLISH_TOPIC,
         azure_iot_mqtt->reported_property_version++);
 
-    snprintf(mqtt_publish_message,
-        sizeof(mqtt_publish_message),
-        "{\"%s\":%s}",
-        component,
-        property_message);
+    snprintf(mqtt_publish_message, sizeof(mqtt_publish_message), "{\"%s\":%s}", component, property_message);
 
     return mqtt_publish(azure_iot_mqtt, mqtt_publish_topic, mqtt_publish_message);
 }
@@ -502,8 +498,8 @@ UINT azure_iot_mqtt_publish_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* compo
 {
     CHAR property_message[128];
     snprintf(property_message, sizeof(property_message), "{");
-    snprintf(property_message + strlen(property_message), sizeof(property_message), "\"%s\":{\"value\":\"%s\",\"ac\":200,\"av\":1}", label, value);
-    snprintf(property_message + strlen(property_message), sizeof(property_message), ",\"__t\":\"c\"}");
+    snprintf(property_message + strlen(property_message), sizeof(property_message), "\"%s\":\"%s\",", label, value);
+    snprintf(property_message + strlen(property_message), sizeof(property_message), "\"__t\":\"c\"}");
 
     CHAR mqtt_publish_topic[100];
     CHAR mqtt_publish_message[256];
@@ -515,11 +511,7 @@ UINT azure_iot_mqtt_publish_property(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* compo
         DEVICE_TWIN_PUBLISH_TOPIC,
         azure_iot_mqtt->reported_property_version++);
 
-    snprintf(mqtt_publish_message,
-        sizeof(mqtt_publish_message),
-        "{\"%s\":%s}",
-        component,
-        property_message);
+    snprintf(mqtt_publish_message, sizeof(mqtt_publish_message), "{\"%s\":%s}", component, property_message);
 
     return mqtt_publish(azure_iot_mqtt, mqtt_publish_topic, mqtt_publish_message);
 }
@@ -536,11 +528,7 @@ UINT azure_iot_mqtt_publish_properties(AZURE_IOT_MQTT* azure_iot_mqtt, CHAR* com
         DEVICE_TWIN_PUBLISH_TOPIC,
         azure_iot_mqtt->reported_property_version++);
 
-    snprintf(mqtt_publish_message,
-        sizeof(mqtt_publish_message),
-        "{\"%s\":%s,\"__t\":\"c\"}}",
-        component,
-        message);
+    snprintf(mqtt_publish_message, sizeof(mqtt_publish_message), "{\"%s\":%s,\"__t\":\"c\"}}", component, message);
 
     return mqtt_publish(azure_iot_mqtt, mqtt_publish_topic, mqtt_publish_message);
 }
