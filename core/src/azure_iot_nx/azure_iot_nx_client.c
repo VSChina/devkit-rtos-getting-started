@@ -607,13 +607,39 @@ UINT azure_iot_nx_client_disconnect(AZURE_IOT_NX_CONTEXT* context)
     return NX_SUCCESS;
 }
 
+UINT azure_iot_nx_client_publish_telemetry(AZURE_IOT_NX_CONTEXT* context, CHAR* message)
+{
+    UINT status;
+    NX_PACKET* packet_ptr;
+
+    // Create a telemetry message packet
+    if ((status = nx_azure_iot_hub_client_telemetry_message_create(
+             &context->iothub_client, &packet_ptr, NX_WAIT_FOREVER)))
+    {
+        printf("Telemetry message create failed (0x%08x)\r\n", status);
+        return status;
+    }
+
+    if ((status = nx_azure_iot_hub_client_telemetry_send(
+             &context->iothub_client, packet_ptr, (UCHAR*)message, strlen(message), NX_WAIT_FOREVER)))
+    {
+        printf("Telemetry message send failed (0x%08x)\r\n", status);
+        nx_azure_iot_hub_client_telemetry_message_delete(packet_ptr);
+        return status;
+    }
+
+    printf("Telemetry message sent: %s.\r\n", message);
+
+    return NX_SUCCESS;
+}
+
 UINT azure_iot_nx_client_publish_float_telemetry(AZURE_IOT_NX_CONTEXT* context, CHAR* key, float value)
 {
     UINT status;
     CHAR buffer[30];
     NX_PACKET* packet_ptr;
 
-    int intvalue = value;
+    int intvalue  = value;
     int fracvalue = abs(100 * (value - (long)value));
 
     if (snprintf(buffer, sizeof(buffer), "{\"%s\":%d.%2d}", key, intvalue, fracvalue) > sizeof(buffer) - 1)
@@ -643,6 +669,43 @@ UINT azure_iot_nx_client_publish_float_telemetry(AZURE_IOT_NX_CONTEXT* context, 
     return NX_SUCCESS;
 }
 
+UINT azure_iot_nx_client_publish_property(AZURE_IOT_NX_CONTEXT* context, CHAR* component, CHAR* message)
+{
+    UINT status;
+    UINT response_status;
+    UINT request_id;
+    ULONG version;
+    CHAR buffer[256];
+
+    if (snprintf(buffer, sizeof(buffer), "{\"%s\":%s}", component, message) > sizeof(buffer) - 1)
+    {
+        printf("ERROR: insufficient buffer size to publish property\r\n");
+        return NX_SIZE_ERROR;
+    }
+
+    if ((status = nx_azure_iot_hub_client_device_twin_reported_properties_send(&context->iothub_client,
+             (UCHAR*)buffer,
+             strlen(buffer),
+             &request_id,
+             &response_status,
+             &version,
+             NX_WAIT_FOREVER)))
+    {
+        printf("Device twin reported properties failed (0x%08x)\r\n", status);
+        return status;
+    }
+
+    if ((response_status < 200) || (response_status >= 300))
+    {
+        printf("device twin report properties failed (%d)\r\n", response_status);
+        return status;
+    }
+
+    printf("Device twin property sent: %s\r\n", buffer);
+
+    return NX_SUCCESS;
+}
+
 UINT azure_iot_nx_client_publish_float_property(AZURE_IOT_NX_CONTEXT* context, CHAR* key, float value)
 {
     UINT status;
@@ -651,7 +714,7 @@ UINT azure_iot_nx_client_publish_float_property(AZURE_IOT_NX_CONTEXT* context, C
     ULONG version;
     CHAR buffer[30];
 
-    int intvalue = value;
+    int intvalue  = value;
     int fracvalue = abs(100 * (value - (long)value));
 
     if (snprintf(buffer, sizeof(buffer), "{\"%s\":%d.%2d}", key, intvalue, fracvalue) > sizeof(buffer) - 1)
@@ -694,6 +757,43 @@ UINT azure_iot_nx_client_publish_bool_property(AZURE_IOT_NX_CONTEXT* context, CH
     if (snprintf(buffer, sizeof(buffer), "{\"%s\":%s}", key, (value ? "true" : "false")) > sizeof(buffer) - 1)
     {
         printf("ERROR: Unsufficient buffer size to publish bool property\r\n");
+        return NX_SIZE_ERROR;
+    }
+
+    if ((status = nx_azure_iot_hub_client_device_twin_reported_properties_send(&context->iothub_client,
+             (UCHAR*)buffer,
+             strlen(buffer),
+             &request_id,
+             &response_status,
+             &version,
+             NX_WAIT_FOREVER)))
+    {
+        printf("Error: device twin reported properties failed (0x%08x)\r\n", status);
+        return status;
+    }
+
+    if ((response_status < 200) || (response_status >= 300))
+    {
+        printf("Error: device twin report properties failed (%d)\r\n", response_status);
+        return status;
+    }
+
+    printf("Device twin property sent: %s\r\n", buffer);
+
+    return NX_SUCCESS;
+}
+
+UINT azure_iot_nx_client_publish_int_writeable_property(AZURE_IOT_NX_CONTEXT* context, CHAR* key, UINT value)
+{
+    UINT status;
+    UINT response_status;
+    UINT request_id;
+    ULONG version;
+    CHAR buffer[64];
+
+    if (snprintf(buffer, sizeof(buffer), "{\"%s\":{\"value\":%d,\"ac\":200,\"av\":1}}", key, value) > sizeof(buffer) - 1)
+    {
+        printf("ERROR: Unsufficient buffer size to publish int property\r\n");
         return NX_SIZE_ERROR;
     }
 

@@ -329,13 +329,13 @@ To delete a resource group by name:
 
 - To learn how to define the interface by [DTDL v2](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md), open the `core/model/RTOSGetStarted.json`. 
     - It defines the telemetry, property and command supported by this sample.
-- To learn how the telemetry is sent to the Azure IoT, open the `MXChip\AZ3166\app\legacy\mqtt.c` file
-    - The function **azure_iot_mqtt_entry** gets the sensor data and sends multiple telemetries.
-- To learn how property values are reported to the Azure IoT, open the `MXChip\AZ3166\app\legacy\mqtt.c` file
-    - The function **azure_iot_mqtt_entry** sends multiple read only properties.
-    - The function **mqtt_device_twin_desired_prop** handles the writeable property and then registered as callback in function **azure_iot_mqtt_entry**.
-- To learn how the DevKit device responds to commands for LED actions and  OLED display text action called from the IoT Central application, open the `MXChip\AZ3166\app\legacy\mqtt.c` file
-    - The function **mqtt_device_method** processes the commands, and then registered as callback in function **azure_iot_mqtt_entry**.
+- To learn how the telemetry is sent to the Azure IoT, open the `MXChip\AZ3166\app\nx_client.c` file
+    - The function **azure_iot_nx_client_entry** gets the sensor data and sends multiple telemetries.
+- To learn how property values are reported to the Azure IoT, open the `MXChip\AZ3166\app\nx_client.c` file
+    - The function **azure_iot_nx_client_entry** sends multiple read only properties.
+    - The function **device_twin_desired_property_cb** handles the writeable property and then registered as callback in function **azure_iot_nx_client_entry**.
+- To learn how the DevKit device responds to commands for LED actions and  OLED display text action called from the IoT Central application, open the `MXChip\AZ3166\app\nx_client.c` file
+    - The function **direct_method_cb** processes the commands, and then registered as callback in function **azure_iot_nx_client_entry**.
 
 
 ## MXChip Device Details
